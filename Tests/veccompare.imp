@@ -1,0 +1,10 @@
+void main() {
+	vector v1 = [1, 2];
+	vector v2 = [2, 1];
+	vector v3 = [2, 2];
+	println(v1 > v2);
+	println(v1 < v2);
+	println(v1 == v3);
+	println(v3 == 2);
+	println(v3 == [2,2]);
+}

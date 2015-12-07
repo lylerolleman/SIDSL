@@ -1,0 +1,6 @@
+void main() {
+	key k = 10;
+	println(k);
+	k := "Bob";
+	println(k);
+}

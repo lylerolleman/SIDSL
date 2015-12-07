@@ -1,0 +1,14 @@
+void main() {
+	var i = init();
+	println(i);
+	i = inc(i);
+	println(i);
+}
+
+var init() {
+	return 0;
+}
+
+var inc(var i) {
+	return i + 1;
+}

@@ -1,0 +1,11 @@
+void main() {
+	vector v1 = [1, 2, 3];
+	vector v2 = [10, 11, 12];
+	vector v3 = [1, 2];
+	println(v1 + v2);
+	println(v1 + v3);
+	println(v1 + 10);
+	vector v4 = -v1;
+	println(v4);
+	println(+v4);
+}

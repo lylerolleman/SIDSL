@@ -1,0 +1,25 @@
+var main() {
+	var x = 5;
+	var y = 5.5;
+	println(x + y);
+	println(x - y);
+	println(x / 5);
+	println(x / y);
+	println(x * 2);
+	println(x ^ 2);
+	var t = true;
+	var f = false;
+	
+	println(t and t);
+	println(t and f);
+	println(f and f);
+	println(t or t);
+	println(t or f);
+	println(f or f);
+	println(t xor t);
+	println(t xor f);
+	println(f xor f);
+	println(!t);
+	println(!f);
+	return 0;
+}

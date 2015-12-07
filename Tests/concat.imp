@@ -1,0 +1,6 @@
+void main() {
+	var string = "Bob";
+	var number = 10;
+	println(string <- "bie");
+	println(number <- " " <- string <- "s");
+}

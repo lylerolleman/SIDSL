@@ -1,0 +1,12 @@
+var main() {
+	key k = "Bob":10;
+	var v = 10.0 + k;
+	println(k);
+	println(v);
+	key k2 = 5 + k;
+	println(k2);
+	k2 := "John";
+	println(k2);
+	println(%k);
+	return 0;
+}

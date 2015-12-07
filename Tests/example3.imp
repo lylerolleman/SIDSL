@@ -1,0 +1,7 @@
+void main() {
+	key k1 = "number1":10;
+	key k2 = "number2":20;
+	println(k1);
+	println(k2);
+	println(k1 + k2);
+}

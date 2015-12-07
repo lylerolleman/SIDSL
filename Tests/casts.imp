@@ -1,0 +1,6 @@
+void main() {
+	key k = "Bob":10;
+	var v = 20;
+	println((var)k);
+	println((key)v);
+}

@@ -1,0 +1,8 @@
+void main() {
+	var n = -2;
+	var p = 5;
+	println(+n);
+	println(-n);
+	println(-p);
+	println(+p);
+}

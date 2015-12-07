@@ -1,0 +1,17 @@
+var main() {
+	var x = 5;
+	var y = 10;
+	println(x == y);
+	println(x != y);
+	println(x == 5);
+	println(x == 5.0);
+	println(x > y);
+	println(x < y);
+	println(x <= y);
+	println(x >= y);
+	println(x <= 5.0);
+	println("Bob" == x);
+	println("Bob" == "Bob");
+	
+	return 0;
+}

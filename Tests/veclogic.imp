@@ -1,0 +1,11 @@
+void main() {
+	vector v1 = [true, true, false];
+	vector v2 = [true, false];
+	vector v3 = [false, true, true];
+	println(v1 or v3);
+	println(v1 and v3);
+	println(v1 and v2);
+	vector v4 = v2 and v3;
+	println(v4);
+	println(!v4);
+}

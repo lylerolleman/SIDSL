@@ -1,0 +1,9 @@
+void main() {
+	var v1 = 10;
+	var v2 = 10.0;
+	var v3 = 10.5;
+	println(v1 + v1);
+	println(v1 + v2);
+	println(v1 + v3);
+	println(v2 + v3);
+}

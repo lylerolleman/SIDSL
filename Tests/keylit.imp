@@ -1,0 +1,4 @@
+var main() {
+	println("Bob":10);
+	return 0;
+}

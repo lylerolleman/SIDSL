@@ -1,0 +1,11 @@
+var main() {
+	var x = 5;
+	var y = 5.5;
+	println(x + y);
+	println(x - y);
+	println(x / 5);
+	println(x / y);
+	println(x * 2);
+	println(x ^ 2);
+	return 0;
+}

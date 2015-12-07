@@ -1,0 +1,6 @@
+void main() {
+	key k = "foo":"bar";
+	println(k);
+	println(%k);
+	println((var)k);
+}

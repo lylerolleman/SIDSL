@@ -1,0 +1,8 @@
+void main() {
+	object o = <var v1, var v2>;
+	o.v1 = 5;
+	o.v2 = 10;
+	println(o.v1);
+	println(o.v2);
+	println(o);
+}

@@ -1,0 +1,5 @@
+vec[true, true, true]
+vec[false, true, false]
+vec[true, false, false]
+vec[false, false, false]
+vec[true, true, true]

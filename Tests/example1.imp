@@ -1,0 +1,10 @@
+void main() {
+	var truestring = "true";
+	var trueboolean = true;
+	if (truestring) {
+		println("print1");
+	}
+	if (trueboolean) {
+		println("print2");
+	}
+}

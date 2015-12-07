@@ -1,0 +1,8 @@
+void main() {
+	var v = 10;
+	println(key_echo(v));
+}
+
+key key_echo(key k) {
+	return k;
+}

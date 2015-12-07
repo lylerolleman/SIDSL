@@ -1,0 +1,5 @@
+void main() {
+	array a = [1,2,3];
+	println(a);
+	println(a[1]);
+}

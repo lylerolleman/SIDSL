@@ -1,0 +1,8 @@
+void myprint() {
+	println("myprint");
+}
+
+var main() {
+	myprint();
+	return 0;
+}

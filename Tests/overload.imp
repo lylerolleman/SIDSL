@@ -1,0 +1,12 @@
+void main() {
+	println(func(10));
+	println(func("foo":10));
+}
+
+var func(var x) {
+	return x;
+}
+
+key func(key k) {
+	return k;
+}

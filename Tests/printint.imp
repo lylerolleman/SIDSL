@@ -1,0 +1,4 @@
+var main() {
+	println(1);
+	return 0;
+}

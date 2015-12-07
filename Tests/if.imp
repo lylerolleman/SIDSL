@@ -1,0 +1,12 @@
+var main() {
+	var x = "Bob";
+	if (true) {
+		println(x);
+	}
+	if (false) {
+		x = 10;
+	} else {
+		println(x);
+	}
+	return 0;
+}
