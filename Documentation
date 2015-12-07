@@ -1,0 +1,686 @@
+PI DSL Documentation
+
+Goal: The purpose of this language is to provide PItive support to mass creation and 
+editing of structured data files (json, xml etc), where the type system exists only to 
+facilitate this goal and provide no further restrictions. 
+
+Current Status: The basic types (vars, keys) are in, as well as basic control flow and functions
+				JSON parsing works, but is not at all integrated yet. 
+				
+				
+Table of Contents:
+	Overview
+	
+	1. General
+		1.1 Comments
+		1.2 importing files
+	2. Types
+		2.1 Var
+		2.2 Key
+		2.3 Array
+		2.4 Vector
+		2.5 Object
+		2.6 Type Casts
+	3. Expressions
+		3.1 Arithmetic
+		3.2 Logic
+		3.3 Comparison
+		3.4 Concatenation
+		3.5 Get
+		3.6 Negative/Positive (absolute value)
+	4. Statements
+		4.1 Declarations
+		4.2 Assignments
+		4.3 Block
+		4.4 If Statements
+		4.5 While Statements
+		4.6 Print/Println
+		4.7 Set
+	5. Functions
+		5.1 Return
+		5.2 Overloading
+	6. Errors
+		TO-DO
+
+1. General
+	The PI interpreter is an AST interpreter, which runs on an expanded version of the AST produced by ANTLR written
+	entirely in Java. 
+	The main execution components of the system are divided into two main categories, Expressions and Statements. 
+	Every statement (ex. if statement, assignment) and every expression (ex. x + y, t and f, a <= b etc.) have their own
+	class, corresponding to a node in the execution tree. Each of these implement the Statement or Expression interfaces,
+	making good use of Java's polymorphism when executing the tree. 
+	Other persistent data is kept in a separate package, such as the symbol table and global methods pertaining to the 
+	type system. 
+	All of the errors in PI extend from a custom PIException, which takes the error message and adds line numbers
+	to it from the base AST
+	See "UNDER THE HOOD" segments in the rest of the documentation for further details
+
+
+	1.1 Comments
+		Standard C/Java commenting
+		//comment out line
+		/*comment out everything inside*/
+		
+	1.2 Importing Files
+		include "filepath.pi"
+		
+		void main() {
+			...
+		}
+		
+		Will parse and execute everything inside of the imported file before starting on the current one.
+		
+		IMPORTANT: global variables and functions in an imported file will be treated as if they were in the main file, 
+		so be careful when naming variables and functions to avoid conflicts. 
+
+2. Types
+
+There are 5 data types in PI:
+	2.1 Var: 
+		Strings, integers, booleans and doubles. How it is interpreted depends entirely on how
+		you try and use it. 
+		Ex 1.
+			void main() {
+				var truestring = "true";
+				var trueboolean = true;
+				if (truestring) {
+					println("print1");
+				}
+				if (trueboolean) {
+					println("print2");
+				}
+			}
+			
+			the output will be:
+			print1
+			print2
+			
+			while the var truestring was initialized to the string value "true", the interpreter will
+			quite happily treat it as a boolean. 
+			
+		Integers and Floating Point Numbers:
+		The result of an arithmetic operation using numbers will be of the appearance of it's most 
+		complex member
+		Ex 2.
+			void main() {
+				var v1 = 10;
+				var v2 = 10.0;
+				var v3 = 10.5;
+				println(v1 + v1);
+				println(v1 + v2);
+				println(v1 + v3);
+				println(v2 + v3);
+			}
+			
+			the output will be:
+			20
+			20.0
+			20.5
+			20.5
+			
+			Note the second one is 20.0, rather than 20, as the (trivial) decimal is maintained in the var
+			
+		UNDER THE HOOD:
+		The interpreter doesn't even bother keeping track of the internal type of var variables,
+		as far as it's concerned, everything is a string until you try to do something un-string-like,
+		such as an add operation, at which point it does it's best to convert to the desired type and
+		perform the operation. 
+		This will likely change later due to performance reasons. 
+	
+	2.2 Key:
+		Keys are, in short, key-value pairs. 
+		The key itself is any var, and the value can be anything at all (including other keys). 
+		A good way to think of these is to compare them to the keys in a JSON file. 
+		Keys can also be used anywhere their value can be used. 
+		Ex 3.
+			void main() {
+				key k1 = "number1":10;
+				key k2 = "number2":20;
+				println(k1);
+				println(k2);
+				println(k1 + k2);
+			}
+			
+			will output:
+			number1:10
+			number2:20
+			30
+			
+			note how the add operation implicitly casts the keys to a var
+		
+		See Get in Expressions and Set, assignments and declarations in statements for more info on how to use keys. 
+		
+		Once vectors are implemented, I plan on adding the ability to get and return a vector of all keys
+		that are currently in scope with the specified name. 
+		
+	2.3 Array:
+		Arrays are pretty standard issue as well (for now), a simple sequences of same type values
+		All array values must be of the same type (may change later)
+		
+		Ex Arrays:
+			void main() {
+				array a = [1,2,3];
+				println(a);
+				println(a[1]);
+			}
+			
+			output:
+			[1, 2, 3]
+			2
+			
+			Notice that the print statement is perfectly capable of printing out an array without forcing
+			the user to manually do it with a loop. This is only needed if a custom format is desired
+			
+		you can also assign to a specific element in an array in normal C style
+		
+		Ex 9:
+			void main() {
+				array a = [1,2,3];
+				a[1] = 4;
+				println(a);
+			}
+			
+			output:
+			[1, 4, 3]
+			
+	2.4 Vector:
+		Vector's are very similar to arrays. There are two main differences, vectors are homogenous, so every element must
+		be of the same type, and vectors can be used in most expressions, the result being the result of the operation being
+		performed on the individual elements
+		
+		Ex vecarith:
+			void main() {
+				vector v1 = [1, 2, 3];
+				vector v2 = [10, 11, 12];
+				vector v3 = [1, 2];
+				println(v1 + v2);
+				println(v1 + v3);
+				println(v1 + 10);
+				vector v4 = -v1;
+				println(v4);
+				println(+v4);
+			}
+			
+			Note how vectors are built in the same way as arrays (and can be indexed like them too)
+			
+			output:
+			vec[11, 13, 15]
+			vec[2, 4, 3]
+			vec[11, 12, 13]
+			vec[-1, -2, -3]
+			vec[1, 2, 3]
+			
+			When two vectors have an arithmetic operation performed on them, it performs that operation on each element
+			When the vectors are of different sizes, the smaller vector is padded with an identity value based on the 
+			vector type. 
+				var: 0, 0.0, false, "" //depends on what the var actually is.
+				key: null:identity
+				array: [] //empty array
+				object: <> //empty object
+				vector: vec[identity] 
+				where identity is the identity value of the variable being extended
+				so if you have a vector: vec["bob":5, "foo":10] padded up to size 3, you'll get 
+				vec["bob":5, "foo":10, null:0]
+			when a scalar and vector are involved, the scalar is turned into a vector of that scalar value at the size of
+			the vector. 
+			
+			It should be noted that using keys, one can bypass the homogenous restriction of vectors, however doing so would
+			nullify any advantage of using a vector and should never be done. Use an array instead. 
+			
+		Ex veclogic:
+			void main() {
+				vector v1 = [true, true, false];
+				vector v2 = [true, false];
+				vector v3 = [false, true, true];
+				println(v1 or v3);
+				println(v1 and v3);
+				println(v1 and v2);
+				vector v4 = v2 and v3;
+				println(v4);
+				println(!v4);
+			}
+			
+			output:
+			vec[true, true, true]
+			vec[false, true, false]
+			vec[true, false, false]
+			vec[false, false, false]
+			vec[true, true, true]
+			
+		Ex veccompare:
+			void main() {
+				vector v1 = [1, 2];
+				vector v2 = [2, 1];
+				vector v3 = [2, 2];
+				println(v1 > v2);
+				println(v1 < v2);
+				println(v1 == v3);
+				println(v3 == 2);
+				println(v3 == [2,2]);
+			}
+			
+			output:
+			vec[false, true]
+			vec[true, false]
+			false
+			false
+			true
+			
+			note here, the == (and !=) operators don't return a vector, they perform the element-wise comparison and
+			returns true only if all elements are equal (!= obviously just the negation of this)
+			
+	2.5 Object:
+		Objects in PI are more like C structs than objects you find in an object oriented language, so don't let the
+		name confuse you. 
+		The fields and the field types are created using the object constructor expression <type id, ...> and then accessed
+		using the dot operator. 
+		There must be at least one field. They can be of any type, even other objects. 
+		
+		Ex 10:
+			void main() {
+				object o = <var v1, var v2>;
+				o.v1 = 5;
+				o.v2 = 10;
+				println(o.v1);
+				println(o.v2);
+				println(o);
+			}
+			
+			output:
+			5
+			10
+			<5, 10>
+			
+			Note, you cannot assign variables in the constructor, only declare the fields themselves. This may change later
+			Like keys and arrays, objects can be printed out directly, though if a different format is desired it must be done 
+			manually
+		
+	2.6 Type Casts:
+		PI supports explicit type casts, however these are there for a matter of convenience and do not
+		provide any actual new functionality, and there are hazards involved with using them. As such they
+		should only be used rarely and with care. 
+		
+		Ex Casts:
+			void main() {
+				key k = "Bob":10;
+				var v = 20;
+				println((var)k);
+				println((key)v);
+			}
+			
+			Will output:
+			10
+			null:20
+			
+			notice how v has a key value of null now. This can cause issues if it is used inappropriately 
+		
+3. Expressions:
+	3.1 Arithmetic:
+		Add, subtract, multiply, divide and power. Follows the usual order of operation rules
+		
+		Ex Arithmetic:
+			var main() {
+				var x = 5;
+				var y = 5.5;
+				println(x + y);
+				println(x - y);
+				println(x / 5);
+				println(x / y);
+				println(x * 2);
+				println(x ^ 2);
+				return 0;
+			}
+			
+			will output:
+			10.5
+			-0.5
+			1
+			0.9090909090909091
+			10
+			25
+	
+	3.2 Logic:
+		and, or, xor and not
+		
+		Ex Logic:
+			var main() {
+				var t = true;
+				var f = false;
+
+				println(t and t);
+				println(t and f);
+				println(f and f);
+				println(t or t);
+				println(t or f);
+				println(f or f);
+				println(t xor t);
+				println(t xor f);
+				println(f xor f);
+				println(!t);
+				println(!f);
+				return 0;
+			}
+			
+			Output:
+			true
+			false
+			false
+			true
+			true
+			false
+			false
+			true
+			false
+			false
+			true
+			
+	3.3 Comparison:
+		Greater than, less than, equal, greater than and equal, less than and equal
+		
+		Ex Compare:
+			var main() {
+				var x = 5;
+				var y = 10;
+				println(x == y);
+				println(x != y);
+				println(x == 5);
+				println(x == 5.0);
+				println(x > y);
+				println(x < y);
+				println(x <= y);
+				println(x >= y);
+				println(x <= 5.0);
+				println("Bob" == x);
+				println("Bob" == "Bob");
+
+				return 0;
+			}
+			
+			Output:
+			false
+			true
+			true
+			true
+			false
+			true
+			true
+			false
+			true
+			false
+			true
+		
+	3.4 Concatenation:
+		Quite simply, stick stuff together
+		
+		Ex Concat:
+			void main() {
+				var string = "Bob";
+				var number = 10;
+				println(string <- "bie");
+				println(number <- " " <- string <- "s");
+			}
+			
+			Ouput:
+			Bobbie
+			10 Bobs
+			
+			note it will happily concatenate numbers and strings. As mentioned in the types section,
+			PI doesn't really care what it is, so longer as it can make sense of it in context
+			
+	3.5 Get:
+		Gets the value of the key in a key variable
+		
+		Ex 4: 
+			void main() {
+				key k = "foo":"bar";
+				println(k);
+				println(%k);
+				println((var)k);
+			}
+			
+			Output:
+			foo:bar
+			foo
+			bar
+			
+	3.6 Negative/Positive:
+		Unary negative and positive. 
+		
+		Ex 5:
+			void main() {
+				var n = -2;
+				var p = 5;
+				println(+n);
+				println(-n);
+				println(-p);
+				println(+p);
+			}
+			
+			Output:
+			2
+			2
+			-5
+			5
+			
+			Note the positive operator might more accurately be called the absolute value operator, unlike
+			the trivial operator found in some other languages. 
+
+4. Statements:
+	4.1 Declaration:
+		Declarations follow the same basic style as most languages, <type> <id> = <expression>
+		Keep in mind that declarations only exist within their scope. 
+		All global declarations must be declared at the beginning of the file, before main or any other function
+		
+		Ex 6:
+			var x = 0;
+			void main() {
+				println(x);
+			}
+			
+			Output:
+			0
+			
+	4.2 Assignment:
+		Assigns a value to an already declared variable, pretty standard fare. 
+		
+		Ex Assig:
+			var x = 10.0;
+			var main() {
+				x = "Bob";
+				println(x);
+				return 0;
+			}
+			
+			Output:
+			Bob
+			
+		Where caution must be taken is in the assignment of keys to vars and vice versa. PI will
+		implicity cast the result of the expression in these cases, however the result may not be what
+		you want it to be (As a general rule, all casts are hazardous). 
+		
+		Ex 7:
+			void main() {
+				key k = "Bob":10;
+				var v = 10.0 + k;
+				println(k);
+				println(v);
+				key k2 = 5 + k;
+				k = 5 + k;
+				println(k2);
+				println(k);
+			}
+			
+			Output
+			Bob:10
+			20.0
+			null:15
+			Bob:15
+			
+			notice the implicit cast of output of the two 5 + k expressions. The first one only gets the var
+			from the add operation, whereas the second already has the key "Bob" and as such it keeps the key. 
+			
+	4.3 Block:
+		Blocks are segments of code surrounded by {}, typically seen in conjunction with functions, if statements
+		and while loops, though they can be on there own. Variables declared inside a block do not have scope
+		outside that block. 
+		
+	4.4 If Statement:	
+		Standard issue if statements, take a conditional and execute the code if it is true, and the optional else
+		block if false. 
+		
+		Ex If:
+			var main() {
+				var x = "Bob";
+				if (true) {
+					println(x);
+				}
+				if (false) {
+					x = 10;
+				} else {
+					println(x);
+				}
+				return 0;
+			}
+			
+			Output
+			Bob
+			Bob
+	
+	4.5 While:
+		While loops work here like they work pretty much everywhere else, iterate over a block of code until a break
+		is hit or the condition fails. 
+		
+		Ex While:
+			var main() {
+				var x = 0;
+				while (x < 10) {
+					x = x + 1;
+				}
+				println(x);
+				x = 0;
+				while (x < 10) {
+					if (x == 5) {
+						break;
+					} else {
+						x = x + 1;
+					}
+				}
+				println(x);
+				return 0;
+			}
+			
+			Output:
+			10
+			5
+			
+			notice how the break in the second loop prematurely exits the loop. Continue is also supported in
+			PI and is used in the same way as other languages. 
+			
+	4.6 Print/Println:
+		printing is done using the print and println built in functions. 
+		keys are printed with colon separated values for the key and value
+		arrays are printed with common separated values inside brackets, ex. [1,2,3]
+		
+		TO-DO: add code examples once arrays are implemented
+		
+	4.7 Set:
+		Sets the key in a key variable. 
+		
+		Ex 8:
+			void main() {
+				key k = 10;
+				println(k);
+				k := "Bob";
+				println(k);
+			}
+			
+			Output:
+			null:10
+			Bob:10
+
+5. Functions:
+	Functions in PI are standard issue to what you might expect. can be called as an expression or as a statement
+	
+	PI will implicitly cast an argument to match the function definition. 
+	
+	Ex promote:
+		void main() {
+			var v = 10;
+			println(key_echo(v));
+		}
+
+		key key_echo(key k) {
+			return k;
+		}
+		
+		output:
+		null:10
+		
+		the var v at the call site is promoted to a key in order to match the function definition
+	
+	Also, there is recursion in PI like elsewhere.
+	
+	Ex Recursive:
+		void main() {
+			println(rec(0, 5));
+		}
+			var rec(var i, var target) {
+			if (i == target) {
+				return i;
+			} else {
+				return rec(inc(i), target);
+			}
+		}
+		var inc(var v) {
+			return v + 1;
+		}
+		
+		Output
+		5
+		
+		The most verbose way of counting to 5. notice the println functions are being called as statements and the
+		inc and rec functions are being called as expressions. 
+		
+		UNDER THE HOOD:
+		print and println are not actually proper functions at all, they just look like them. They are implemented
+		as their own statement, unlike user defined ones which utilize the Call or StatCall nodes in the execution
+		tree
+
+	5.1 Return:
+		Again, pretty standard issue. It passes the value of the expression up to the caller, unless no expression is 
+		given, at which point a void type is returned with null value. 
+		
+	5.2 Overloaded functions:
+		PI supports function overloading, that is, in the case of multiple functions of the same name, it will 
+		determine which to execute using the argument types
+		
+		Ex overload:
+			void main() {
+				println(func(10));
+				println(func("foo":10));
+			}
+
+			var func(var x) {
+				return x;
+			}
+
+			key func(key k) {
+				return k;
+			}
+			
+			output:
+			10
+			foo:10
+			
+			notice the function func has the same name, but different parameters. PI will use these in order to 
+			determine which to call. 
+			
+			Note: the interpretor will check for exact matches before it attempts to do any promotion of the arguments
+			
+			UNDER THE HOOD:
+			The system works by creating groups of functions with the same name (unique function names will just be alone
+			in its group) which is then checked to find the correct function. This is NOT a free operation, so use this
+			feature sparingly. 
+
+Errors:
+	TO-DO
